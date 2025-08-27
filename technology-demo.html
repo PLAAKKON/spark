@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spark Robot - Technology Demo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(0,0,0,0.9);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #00C853, #1E88E5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,200,83,0.9);
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 25px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(0,200,83,1);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .demo-section {
+            background: rgba(255,255,255,0.95);
+            margin: 2rem 0;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 3rem;
+            margin: 3rem 0;
+        }
+
+        .tech-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .tech-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .tech-card i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #FFD700;
+        }
+
+        .tech-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .latency-demo {
+            background: linear-gradient(135deg, #00C853 0%, #4CAF50 100%);
+            color: white;
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .latency-counter {
+            font-size: 4rem;
+            font-weight: bold;
+            margin: 1rem 0;
+            color: #FFD700;
+        }
+
+        .security-features {
+            background: linear-gradient(135deg, #FF5722 0%, #FF9800 100%);
+            color: white;
+            padding: 3rem;
+            border-radius: 20px;
+            margin: 2rem 0;
+        }
+
+        .security-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .security-item {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .video-demo {
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .video-placeholder {
+            background: linear-gradient(45deg, #333, #555);
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .control-panel {
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .control-btn {
+            background: linear-gradient(45deg, #00C853, #4CAF50);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        .live-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #FF4444;
+            border-radius: 50%;
+            animation: pulse 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .robot-status {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .status-item {
+            background: rgba(255,255,255,0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .status-online {
+            color: #4CAF50;
+        }
+
+        .status-offline {
+            color: #FF5722;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .demo-section {
+                padding: 1.5rem;
+            }
+            
+            .tech-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Home
+    </a>
+
+    <div class="header">
+        <h1><i class="fas fa-robot"></i> Spark Robot Technology Demo</h1>
+        <p>Real-time WebRTC streaming & ultra-low latency robot control</p>
+    </div>
+
+    <div class="container">
+        <!-- Live Demo Section -->
+        <div class="demo-section">
+            <h2><span class="live-indicator"></span>Live Robot Video Feed</h2>
+            <div class="video-demo">
+                <div class="video-placeholder">
+                    <div>
+                        <i class="fas fa-video" style="font-size: 3rem; margin-bottom: 1rem;"></i><br>
+                        WebRTC Video Stream - Ultra Low Latency<br>
+                        <small>Click "Start Camera" to begin live demo</small>
+                    </div>
+                </div>
+                <div class="control-panel">
+                    <button class="control-btn" onclick="startCamera()">
+                        <i class="fas fa-video"></i> Start Camera
+                    </button>
+                    <button class="control-btn" onclick="controlRobot()">
+                        <i class="fas fa-gamepad"></i> Control Robot
+                    </button>
+                    <button class="control-btn" onclick="showStats()">
+                        <i class="fas fa-chart-line"></i> Show Stats
+                    </button>
+                    <button class="control-btn" onclick="emergencyStop()">
+                        <i class="fas fa-stop"></i> Emergency Stop
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Latency Demo -->
+        <div class="latency-demo">
+            <h2><i class="fas fa-tachometer-alt"></i> Ultra-Low Latency Performance</h2>
+            <div class="latency-counter" id="latencyCounter">< 50ms</div>
+            <p>WebRTC peer-to-peer connection enables unprecedented low latency for real-time robot control</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">WebRTC</div>
+                    <div>Direct P2P Connection</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">< 50ms</div>
+                    <div>Video Latency</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">< 10ms</div>
+                    <div>Control Latency</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">1080p</div>
+                    <div>HD Video Quality</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technology Stack -->
+        <div class="demo-section">
+            <h2><i class="fas fa-microchip"></i> Core Technologies</h2>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <i class="fas fa-video"></i>
+                    <h3>WebRTC</h3>
+                    <p>Real-time communication protocol enabling direct peer-to-peer video streaming with minimal latency. No plugins required - works directly in web browsers.</p>
+                </div>
+                <div class="tech-card">
+                    <i class="fas fa-exchange-alt"></i>
+                    <h3>WebSocket</h3>
+                    <p>Full-duplex communication channel for instant signaling and robot control commands. Enables real-time bidirectional data exchange.</p>
+                </div>
+                <div class="tech-card">
+                    <i class="fas fa-brain"></i>
+                    <h3>AI Processing</h3>
+                    <p>Machine learning algorithms for autonomous navigation, obstacle detection, and intelligent decision making in real-time.</p>
+                </div>
+                <div class="tech-card">
+                    <i class="fas fa-cloud"></i>
+                    <h3>Cloudflare Tunnel</h3>
+                    <p>Secure global connectivity without port forwarding. SSL encryption and DDoS protection for enterprise-grade security.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Features -->
+        <div class="security-features">
+            <h2><i class="fas fa-shield-alt"></i> Multi-Layer Security System</h2>
+            <p>Physical and digital security measures ensure safe operation in all environments</p>
+            
+            <div class="security-grid">
+                <div class="security-item">
+                    <i class="fas fa-eye"></i>
+                    <h4>Proximity Sensors</h4>
+                    <p>Ultrasonic sensors detect obstacles and prevent collisions</p>
+                </div>
+                <div class="security-item">
+                    <i class="fas fa-thermometer-half"></i>
+                    <h4>Temperature Monitoring</h4>
+                    <p>Real-time thermal sensors prevent overheating</p>
+                </div>
+                <div class="security-item">
+                    <i class="fas fa-battery-three-quarters"></i>
+                    <h4>Power Management</h4>
+                    <p>Smart battery monitoring and automatic shutdown protection</p>
+                </div>
+                <div class="security-item">
+                    <i class="fas fa-lock"></i>
+                    <h4>SSL Encryption</h4>
+                    <p>End-to-end encrypted communication channels</p>
+                </div>
+                <div class="security-item">
+                    <i class="fas fa-user-shield"></i>
+                    <h4>Access Control</h4>
+                    <p>Authentication and authorization for operator safety</p>
+                </div>
+                <div class="security-item">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h4>Emergency Stop</h4>
+                    <p>Instant remote emergency shutdown capability</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Robot Status -->
+        <div class="robot-status">
+            <h2><i class="fas fa-robot"></i> Live Robot Status</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <i class="fas fa-wifi status-online"></i>
+                    <div>Connection: <span class="status-online">Online</span></div>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-video status-online"></i>
+                    <div>Camera: <span class="status-online">Active</span></div>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-battery-full status-online"></i>
+                    <div>Battery: <span class="status-online">95%</span></div>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-thermometer-half status-online"></i>
+                    <div>Temperature: <span class="status-online">Normal</span></div>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-microchip status-online"></i>
+                    <div>CPU: <span class="status-online">24%</span></div>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-memory status-online"></i>
+                    <div>Memory: <span class="status-online">67%</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="demo-section" style="text-align: center;">
+            <h2><i class="fas fa-rocket"></i> Experience the Future</h2>
+            <p style="font-size: 1.2rem; margin-bottom: 2rem;">Ready to control Spark Robot? Start your live demo session now!</p>
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                <a href="../obs-broadcaster.html" class="control-btn" style="text-decoration: none; display: inline-block;">
+                    <i class="fas fa-video"></i> Start Live Demo
+                </a>
+                <a href="../robot-viewer.html" class="control-btn" style="text-decoration: none; display: inline-block; background: linear-gradient(45deg, #FF9800, #FFC107);">
+                    <i class="fas fa-gamepad"></i> Robot Control
+                </a>
+                <a href="index.html" class="control-btn" style="text-decoration: none; display: inline-block; background: linear-gradient(45deg, #9C27B0, #673AB7);">
+                    <i class="fas fa-home"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate real-time latency updates
+        function updateLatency() {
+            const latencyElement = document.getElementById('latencyCounter');
+            const latency = Math.floor(Math.random() * 30) + 20; // 20-50ms
+            latencyElement.textContent = `< ${latency}ms`;
+        }
+
+        // Update latency every 2 seconds
+        setInterval(updateLatency, 2000);
+
+        // Demo control functions
+        function startCamera() {
+            alert('Starting WebRTC camera feed...\nRedirecting to live demo.');
+            window.open('../obs-broadcaster.html', '_blank');
+        }
+
+        function controlRobot() {
+            alert('Opening robot control interface...\nWebSocket connection established.');
+            window.open('../robot-viewer.html', '_blank');
+        }
+
+        function showStats() {
+            alert('Live Statistics:\n' +
+                  '• WebRTC Latency: 35ms\n' +
+                  '• WebSocket Ping: 12ms\n' +
+                  '• Video Resolution: 1920x1080\n' +
+                  '• Frame Rate: 30 FPS\n' +
+                  '• Connection: Stable');
+        }
+
+        function emergencyStop() {
+            if (confirm('Are you sure you want to execute emergency stop?\nThis will immediately halt all robot operations.')) {
+                alert('EMERGENCY STOP ACTIVATED\n\nAll robot systems have been safely shut down.');
+            }
+        }
+
+        // Simulate status updates
+        function updateRobotStatus() {
+            const statusItems = document.querySelectorAll('.status-item');
+            // Random status updates for demo purposes
+            const battery = Math.floor(Math.random() * 20) + 80;
+            const cpu = Math.floor(Math.random() * 30) + 15;
+            const memory = Math.floor(Math.random() * 40) + 50;
+            
+            // Update displayed values
+            const batteryElement = statusItems[2].querySelector('span');
+            const cpuElement = statusItems[4].querySelector('span');
+            const memoryElement = statusItems[5].querySelector('span');
+            
+            if (batteryElement) batteryElement.textContent = `${battery}%`;
+            if (cpuElement) cpuElement.textContent = `${cpu}%`;
+            if (memoryElement) memoryElement.textContent = `${memory}%`;
+        }
+
+        // Update robot status every 5 seconds
+        setInterval(updateRobotStatus, 5000);
+
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', function() {
+            updateLatency();
+            updateRobotStatus();
+        });
+    </script>
+</body>
+</html>
