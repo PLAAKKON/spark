@@ -803,13 +803,31 @@
             const watchBtn = document.getElementById('watchRobotBtn');
             const controlBtn = document.getElementById('controlRobotBtn');
             
+            // Use image ping method to avoid CORS issues
+            const img = new Image();
+            let connectionTimeout;
+            
+            const checkPromise = new Promise((resolve, reject) => {
+                connectionTimeout = setTimeout(() => {
+                    reject(new Error('Connection timeout'));
+                }, 5000);
+                
+                img.onload = () => {
+                    clearTimeout(connectionTimeout);
+                    resolve(true);
+                };
+                
+                img.onerror = () => {
+                    clearTimeout(connectionTimeout);
+                    reject(new Error('Connection failed'));
+                };
+                
+                // Try to load favicon or any small image from the robot server
+                img.src = 'https://sparkrobot.fi/favicon.ico?' + Date.now();
+            });
+            
             try {
-                // Try to connect to the robot system
-                const response = await fetch('https://sparkrobot.fi/viewer-safe.html', { 
-                    method: 'HEAD',
-                    mode: 'no-cors',
-                    timeout: 5000 
-                });
+                await checkPromise;
                 
                 isRobotOnline = true;
                 statusDot.className = 'status-dot status-online';
