@@ -22,7 +22,7 @@
         /* Hero Section */
         .hero {
             height: 100vh;
-            background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(30,144,255,0.7)), url('frontpage.jfif');
+            background: linear-gradient(135deg, rgba(139,69,19,0.8), rgba(160,82,45,0.8)), url('frontpage.jfif');
             background-size: cover;
             background-position: center;
             display: flex;
@@ -54,7 +54,7 @@
             font-size: 4.5rem;
             margin-bottom: 1rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            background: linear-gradient(45deg, #00C853, #1E88E5);
+            background: linear-gradient(45deg, #D2691E, #8B4513);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -99,7 +99,7 @@
         }
 
         .btn-primary {
-            background: linear-gradient(45deg, #00C853, #4CAF50);
+            background: linear-gradient(45deg, #D2691E, #CD853F);
             color: white;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
@@ -143,7 +143,7 @@
         .logo {
             font-size: 1.8rem;
             font-weight: bold;
-            color: #00C853;
+            color: #D2691E;
             text-decoration: none;
         }
 
@@ -160,13 +160,13 @@
         }
 
         .nav-menu a:hover {
-            color: #00C853;
+            color: #D2691E;
         }
 
         /* Problem Section */
         .problem {
             padding: 100px 0;
-            background: linear-gradient(135deg, #FF5722 0%, #FF9800 100%);
+            background: linear-gradient(135deg, #A0522D 0%, #D2691E 100%);
             color: white;
             text-align: center;
         }
@@ -180,7 +180,7 @@
         .section-title {
             font-size: 3rem;
             margin-bottom: 2rem;
-            background: linear-gradient(45deg, #FFD700, #FFF);
+            background: linear-gradient(45deg, #DEB887, #FFF);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -216,13 +216,13 @@
         .city-card i {
             font-size: 2.5rem;
             margin-bottom: 1rem;
-            color: #FFD700;
+            color: #DEB887;
         }
 
         /* Features Section */
         .features {
             padding: 100px 0;
-            background: linear-gradient(135deg, #00C853 0%, #4CAF50 100%);
+            background: linear-gradient(135deg, #D2691E 0%, #CD853F 100%);
             color: white;
         }
 
@@ -249,7 +249,7 @@
         .feature-icon {
             font-size: 3rem;
             margin-bottom: 1rem;
-            background: linear-gradient(45deg, #FFD700, #FFF);
+            background: linear-gradient(45deg, #DEB887, #FFF);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -272,7 +272,7 @@
             font-size: 2.5rem;
             margin-bottom: 2rem;
             color: #333;
-            background: linear-gradient(45deg, #00C853, #1E88E5);
+            background: linear-gradient(45deg, #D2691E, #1E88E5);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -321,7 +321,7 @@
         .tech-item i {
             font-size: 2.5rem;
             margin-bottom: 1rem;
-            color: #00C853;
+            color: #D2691E;
         }
 
         /* Contact Section */
@@ -351,7 +351,7 @@
 
         .contact-item i {
             font-size: 1.5rem;
-            color: #00C853;
+            color: #D2691E;
             margin-right: 20px;
             width: 30px;
         }
@@ -363,7 +363,7 @@
         }
 
         .contact-item a:hover {
-            color: #00C853;
+            color: #D2691E;
         }
 
         /* Footer */
@@ -394,7 +394,7 @@
         }
 
         .social-links a:hover {
-            color: #00C853;
+            color: #D2691E;
         }
 
         /* Responsive Design */
@@ -448,7 +448,7 @@
         .robot-body {
             width: 150px;
             height: 200px;
-            background: linear-gradient(45deg, #00C853, #4CAF50);
+            background: linear-gradient(45deg, #D2691E, #CD853F);
             border-radius: 20px;
             position: absolute;
             top: 50%;
@@ -473,7 +473,7 @@
         .robot-eye {
             width: 15px;
             height: 15px;
-            background: #FFD700;
+            background: #DEB887;
             border-radius: 50%;
             position: absolute;
             top: 25px;
@@ -486,7 +486,7 @@
         .robot-arm {
             width: 60px;
             height: 15px;
-            background: linear-gradient(45deg, #FF9800, #FFC107);
+            background: linear-gradient(45deg, #D2691E, #FFC107);
             border-radius: 10px;
             position: absolute;
             top: 60px;
@@ -546,15 +546,15 @@
             margin-right: 8px;
         }
 
-        .status-online { background: #00C853; }
-        .status-offline { background: #FF5722; }
+        .status-online { background: #D2691E; }
+        .status-offline { background: #A0522D; }
     </style>
 </head>
 <body>
     <!-- Connection Status -->
     <div class="connection-status" id="connectionStatus">
-        <span class="status-dot status-offline" id="statusDot"></span>
-        <span id="statusText">Checking robot connection...</span>
+        <span class="status-dot status-online" id="statusDot"></span>
+        <span id="statusText">Robot system online - Demo ready!</span>
     </div>
 
     <!-- Navigation -->
@@ -831,11 +831,11 @@
                         console.log(`[${new Date().toLocaleString()}] Endpoints available: Camera, Viewer, WebSocket`);
                         
                         // Update button links for online robot
-                        watchBtn.href = 'https://sparkrobot.fi/robot-viewer.html';
+                        watchBtn.href = 'https://sparkrobot.fi/obs-broadcaster.html';
                         watchBtn.target = '_blank';
                         watchBtn.onclick = null;
                         
-                        controlBtn.href = 'https://sparkrobot.fi/camera-sender.html';
+                        controlBtn.href = 'https://sparkrobot.fi/obs-broadcaster.html';
                         controlBtn.target = '_blank';
                         controlBtn.onclick = null;
                     } else {
@@ -860,19 +860,13 @@
                     'Robot system offline';
                 
                 // Update button behavior for offline robot
-                watchBtn.href = '#';
-                watchBtn.target = '';
-                watchBtn.onclick = function(e) {
-                    e.preventDefault();
-                    alert('Robot system is currently offline. The live video feed is not available at the moment.');
-                };
+                watchBtn.href = 'https://sparkrobot.fi/obs-broadcaster.html';
+                watchBtn.target = '_blank';
+                watchBtn.onclick = null;
                 
-                controlBtn.href = '#';
-                controlBtn.target = '';
-                controlBtn.onclick = function(e) {
-                    e.preventDefault();
-                    alert('Robot system is currently offline. Remote control is not available at the moment.');
-                };
+                controlBtn.href = 'https://sparkrobot.fi/obs-broadcaster.html';
+                controlBtn.target = '_blank';
+                controlBtn.onclick = null;
             }
         }
 
