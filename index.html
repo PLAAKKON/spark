@@ -795,6 +795,7 @@
     <script>
         // Robot connection status
         let isRobotOnline = false;
+        let lastOnlineTime = null;
         
         // Check robot system connection
         async function checkRobotConnection() {
@@ -805,19 +806,29 @@
             
             // Try to fetch status from robot server
             try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                
                 const response = await fetch('https://sparkrobot.fi/status.json', {
                     method: 'GET',
-                    timeout: 5000,
-                    signal: AbortSignal.timeout(5000)
+                    signal: controller.signal
                 });
+                
+                clearTimeout(timeoutId);
                 
                 if (response.ok) {
                     const status = await response.json();
                     
                     if (status.status === 'online') {
                         isRobotOnline = true;
+                        lastOnlineTime = new Date();
                         statusDot.className = 'status-dot status-online';
                         statusText.textContent = 'Robot system online';
+                        
+                        // Log successful connection
+                        console.log(`[${new Date().toLocaleString()}] Robot system ONLINE - Connection successful`);
+                        console.log(`[${new Date().toLocaleString()}] Services: HTTP=${status.services?.http_server}, WebSocket=${status.services?.websocket_server}, Tunnel=${status.services?.cloudflare_tunnel}`);
+                        console.log(`[${new Date().toLocaleString()}] Endpoints available: Camera, Viewer, WebSocket`);
                         
                         // Update button links for online robot
                         watchBtn.href = 'https://sparkrobot.fi/robot-viewer.html';
@@ -835,9 +846,18 @@
                 }
                 
             } catch (error) {
+                const currentTime = new Date().toLocaleString();
+                const lastOnlineText = lastOnlineTime ? lastOnlineTime.toLocaleString() : 'Never';
+                
+                console.log(`[${currentTime}] Robot system OFFLINE - ${error.message}`);
+                console.log(`[${currentTime}] Last online: ${lastOnlineText}`);
+                console.log(`[${currentTime}] Retrying connection in 30 seconds...`);
+                
                 isRobotOnline = false;
                 statusDot.className = 'status-dot status-offline';
-                statusText.textContent = 'Robot system offline';
+                statusText.textContent = lastOnlineTime ? 
+                    `Robot system offline (Last online: ${lastOnlineTime.toLocaleTimeString()})` : 
+                    'Robot system offline';
                 
                 // Update button behavior for offline robot
                 watchBtn.href = '#';
@@ -909,4 +929,3 @@
     </script>
 </body>
 </html>
-
