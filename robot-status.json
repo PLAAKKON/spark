@@ -1,15 +1,15 @@
 {
-  "timestamp": "2025-09-04T19:56:46.637122+00:00",
-  "status": "offline",
+  "timestamp": "2025-09-04T20:05:27.121743+00:00",
+  "status": "online",
   "services": {
-    "http_server": false,
-    "websocket_server": false,
-    "cloudflare_tunnel": false
+    "http_server": true,
+    "websocket_server": true,
+    "cloudflare_tunnel": true
   },
   "viewers": 0,
   "recent_activity": [
     {
-      "time": "22:56:28",
+      "time": "23:04:27",
       "type": "HTTP",
       "message": "Server started"
     }
