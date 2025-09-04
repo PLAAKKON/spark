@@ -555,6 +555,48 @@
 
         .status-online { background: #B8860B; }
         .status-offline { background: #6B4423; }
+        
+        /* Recent Activity Log */
+        .activity-log {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            z-index: 1001;
+            font-size: 0.8rem;
+            min-width: 250px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(184, 134, 11, 0.3);
+        }
+        
+        .activity-log h4 {
+            margin: 0 0 10px 0;
+            color: #B8860B;
+            font-size: 0.9rem;
+        }
+        
+        .activity-item {
+            margin: 5px 0;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-family: monospace;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-time {
+            color: #B8860B;
+            font-weight: bold;
+        }
+        
+        .activity-type {
+            color: #F5DEB3;
+        }
     </style>
 </head>
 <body>
@@ -562,6 +604,14 @@
     <div class="connection-status" id="connectionStatus">
         <span class="status-dot status-online" id="statusDot"></span>
         <span id="statusText">Robot system online - Demo ready!</span>
+    </div>
+
+    <!-- Recent Activity Log -->
+    <div class="activity-log" id="activityLog">
+        <h4>🕒 Recent Activity</h4>
+        <div id="activityList">
+            <div class="activity-item">Waiting for connections...</div>
+        </div>
     </div>
 
     <!-- Navigation -->
@@ -599,10 +649,10 @@
             </div>
             
             <div class="cta-buttons">
-                <a href="#" class="btn btn-primary" id="watchRobotBtn">
+                <a href="https://sparkrobot.fi/robot-viewer.html" class="btn btn-primary" id="watchRobotBtn" target="_blank">
                     <i class="fas fa-video"></i> Watch Robot Live
                 </a>
-                <a href="#" class="btn btn-primary" id="controlRobotBtn">
+                <a href="https://sparkrobot.fi/robot-viewer.html" class="btn btn-primary" id="controlRobotBtn" target="_blank">
                     <i class="fas fa-gamepad"></i> Control Robot
                 </a>
                 <a href="#problem" class="btn btn-secondary">
@@ -804,21 +854,113 @@
         let isRobotOnline = false;
         let lastOnlineTime = null;
         
-        // Check robot system connection
+        // Activity tracking
+        let activityHistory = [];
+        const MAX_ACTIVITY_ITEMS = 3;
+        
+        // Add activity to log
+        function addActivity(type, message) {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('fi-FI', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+            
+            activityHistory.unshift({
+                time: timeStr,
+                type: type,
+                message: message
+            });
+            
+            // Keep only last 3 items
+            if (activityHistory.length > MAX_ACTIVITY_ITEMS) {
+                activityHistory = activityHistory.slice(0, MAX_ACTIVITY_ITEMS);
+            }
+            
+            updateActivityDisplay();
+        }
+        
+        // Update activity display
+        function updateActivityDisplay() {
+            const activityList = document.getElementById('activityList');
+            if (!activityList) return;
+            
+            if (activityHistory.length === 0) {
+                activityList.innerHTML = '<div class="activity-item">Waiting for connections...</div>';
+                return;
+            }
+            
+            activityList.innerHTML = activityHistory.map(item => 
+                `<div class="activity-item">
+                    <span class="activity-time">${item.time}</span> 
+                    <span class="activity-type">${item.type}</span>: ${item.message}
+                </div>`
+            ).join('');
+        }
+        
+        // Check robot system connection from live site
         async function checkRobotConnection() {
             const statusDot = document.getElementById('statusDot');
             const statusText = document.getElementById('statusText');
             const watchBtn = document.getElementById('watchRobotBtn');
             const controlBtn = document.getElementById('controlRobotBtn');
             
-            // Try to fetch status from robot server
+            // Try to fetch status from GitHub repository (updated by live server)
             try {
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 5000);
                 
+                // First try to get cached status from GitHub repository
+                const response = await fetch('https://raw.githubusercontent.com/PLAAKKON/spark/main/robot-status.json', {
+                    method: 'GET',
+                    signal: controller.signal,
+                    cache: 'no-cache'
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (response.ok) {
+                    const status = await response.json();
+                    
+                    // Check if status is recent (within last 5 minutes)
+                    const statusTime = new Date(status.timestamp);
+                    const now = new Date();
+                    const timeDiff = (now - statusTime) / 1000 / 60; // minutes
+                    
+                    if (timeDiff <= 5 && status.status === 'online') {
+                        isRobotOnline = true;
+                        lastOnlineTime = statusTime;
+                        statusDot.className = 'status-dot status-online';
+                        
+                        // Show broadcast status with cached info
+                        const wsStatus = status.services?.websocket_server ? '✅ WebSocket' : '❌ WebSocket';
+                        const httpStatus = status.services?.http_server ? '✅ HTTP' : '❌ HTTP';
+                        const viewers = status.viewers || 0;
+                        statusText.textContent = `🎥 LIVE | ${wsStatus} | ${httpStatus} | 👥 ${viewers}`;
+                        
+                        // Add activity log entries from cached data
+                        if (status.recent_activity) {
+                            activityHistory = status.recent_activity.slice(0, MAX_ACTIVITY_ITEMS);
+                            updateActivityDisplay();
+                        }
+                        
+                        // Log successful connection
+                        console.log(`[${new Date().toLocaleString()}] Robot system ONLINE - Status cached from GitHub`);
+                        console.log(`[${new Date().toLocaleString()}] Last update: ${statusTime.toLocaleString()}`);
+                        
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.log(`[${new Date().toLocaleString()}] Could not fetch cached status from GitHub: ${error.message}`);
+            }
+            
+            // Fallback: Try direct connection to live server (may fail due to CORS)
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
+                
                 const response = await fetch('https://sparkrobot.fi/status.json', {
                     method: 'GET',
-                    signal: controller.signal
+                    signal: controller.signal,
+                    mode: 'cors'
                 });
                 
                 clearTimeout(timeoutId);
@@ -830,19 +972,21 @@
                         isRobotOnline = true;
                         lastOnlineTime = new Date();
                         statusDot.className = 'status-dot status-online';
-                        statusText.textContent = 'Robot system online';
                         
-                        // Log successful connection
-                        console.log(`[${new Date().toLocaleString()}] Robot system ONLINE - Connection successful`);
-                        console.log(`[${new Date().toLocaleString()}] Services: HTTP=${status.services?.http_server}, WebSocket=${status.services?.websocket_server}, Tunnel=${status.services?.cloudflare_tunnel}`);
-                        console.log(`[${new Date().toLocaleString()}] Endpoints available: Camera, Viewer, WebSocket`);
+                        const wsStatus = status.services?.websocket_server ? '✅ WebSocket' : '❌ WebSocket';
+                        const httpStatus = status.services?.http_server ? '✅ HTTP' : '❌ HTTP';
+                        const viewers = status.viewers || 0;
+                        statusText.textContent = `🎥 LIVE | ${wsStatus} | ${httpStatus} | 👥 ${viewers}`;
                         
-                        // Update button links for online robot
-                        watchBtn.href = 'https://sparkrobot.fi/robot-viewer.html';
-                        watchBtn.target = '_blank';
-                        watchBtn.onclick = null;
+                        console.log(`[${new Date().toLocaleString()}] Robot system ONLINE - Direct connection successful`);
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.log(`[${new Date().toLocaleString()}] Direct connection failed (expected due to CORS): ${error.message}`);
+            }
                         
-                        controlBtn.href = 'https://sparkrobot.fi/mobile.html';
+                        controlBtn.href = 'https://sparkrobot.fi/robot-viewer.html';
                         controlBtn.target = '_blank';
                         controlBtn.onclick = null;
                     } else {
@@ -863,15 +1007,18 @@
                 isRobotOnline = false;
                 statusDot.className = 'status-dot status-offline';
                 statusText.textContent = lastOnlineTime ? 
-                    `Robot system offline (Last online: ${lastOnlineTime.toLocaleTimeString()})` : 
-                    'Robot system offline';
+                    `📴 Broadcast OFFLINE (Last live: ${lastOnlineTime.toLocaleTimeString()})` : 
+                    '📴 Broadcast OFFLINE - Start obs-broadcaster.html to go live';
+                
+                // Add offline activity log
+                addActivity('System', 'Broadcast offline');
                 
                 // Update button behavior for offline robot
                 watchBtn.href = 'https://sparkrobot.fi/robot-viewer.html';
                 watchBtn.target = '_blank';
                 watchBtn.onclick = null;
                 
-                controlBtn.href = 'https://sparkrobot.fi/mobile.html';
+                controlBtn.href = 'https://sparkrobot.fi/robot-viewer.html';
                 controlBtn.target = '_blank';
                 controlBtn.onclick = null;
             }
@@ -902,6 +1049,10 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize activity log
+            addActivity('System', 'Page loaded, checking status...');
+            updateActivityDisplay();
+            
             checkRobotConnection();
             animateOnScroll();
             
