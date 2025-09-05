@@ -651,10 +651,10 @@
             </div>
             
             <div class="cta-buttons">
-                <a href="javascript:void(0)" class="btn btn-primary" id="watchRobotBtn" onclick="checkAndNavigate('watch')">
+                <a href="https://sparkrobot.fi/robot-viewer.html" class="btn btn-primary" id="watchRobotBtn">
                     <i class="fas fa-video"></i> Watch Robot Live
                 </a>
-                <a href="javascript:void(0)" class="btn btn-primary" id="controlRobotBtn" onclick="checkAndNavigate('control')">
+                <a href="https://sparkrobot.fi/robot-viewer.html" class="btn btn-primary" id="controlRobotBtn">
                     <i class="fas fa-gamepad"></i> Control Robot
                 </a>
                 <a href="#problem" class="btn btn-secondary">
@@ -897,49 +897,6 @@
             ).join('');
         }
         
-        // Check if robot viewer page is accessible before navigating
-        async function checkAndNavigate(type) {
-            const targetUrl = 'https://sparkrobot.fi/robot-viewer.html';
-            
-            try {
-                // Try to create an image element to test if the domain is accessible
-                // This bypasses CORS issues since images don't have CORS restrictions
-                const testConnectivity = () => {
-                    return new Promise((resolve, reject) => {
-                        const img = new Image();
-                        const timeout = setTimeout(() => {
-                            reject(new Error('Timeout'));
-                        }, 5000);
-                        
-                        img.onload = () => {
-                            clearTimeout(timeout);
-                            resolve(true);
-                        };
-                        
-                        img.onerror = () => {
-                            clearTimeout(timeout);
-                            reject(new Error('Domain not accessible'));
-                        };
-                        
-                        // Try to load a small image from the domain
-                        img.src = 'https://sparkrobot.fi/favicon.ico?' + Date.now();
-                    });
-                };
-                
-                await testConnectivity();
-                
-                // If we get here, the domain is accessible
-                window.open(targetUrl, '_blank');
-                addActivity('User', `${type === 'watch' ? 'Watching' : 'Controlling'} robot - Page accessible`);
-                
-            } catch (error) {
-                // Domain is not accessible
-                const actionText = type === 'watch' ? 'watch' : 'control';
-                alert(`Robot system is currently offline. Cannot ${actionText} robot at this time.\n\nThe robot viewer page is not accessible. Please try again when the broadcast is live.`);
-                addActivity('System', `Failed to access robot viewer - System offline`);
-            }
-        }
-
         // Check robot system connection from live site
         async function checkRobotConnection() {
             const statusDot = document.getElementById('statusDot');
@@ -1085,7 +1042,121 @@
                 }
             });
         });
+
+        // Ping function to check if server is accessible
+        function ping(url, timeout = 3000) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const to = setTimeout(() => { 
+                    cleanup(); 
+                    reject(new Error('timeout')); 
+                }, timeout);
+                
+                function cleanup() { 
+                    clearTimeout(to); 
+                    img.onload = null; 
+                    img.onerror = null; 
+                }
+                
+                img.onload = () => { 
+                    cleanup(); 
+                    resolve(); 
+                };
+                
+                img.onerror = () => { 
+                    cleanup(); 
+                    reject(new Error('error')); 
+                };
+                
+                img.src = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+            });
+        }
+
+        // Setup robot button click handlers
+        const targetUrl = 'https://sparkrobot.fi/robot-viewer.html';
+        const pingUrl = 'https://sparkrobot.fi/favicon.ico';
+
+        // Add return button functionality for robot viewer
+        function addReturnButton() {
+            if (window.location.href.includes('robot-viewer.html')) {
+                // Create return button if we're on robot viewer page
+                const returnBtn = document.createElement('button');
+                returnBtn.innerHTML = '← Palaa kotisivulle';
+                returnBtn.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    left: 20px;
+                    z-index: 9999;
+                    background: rgba(184, 134, 11, 0.9);
+                    color: white;
+                    border: none;
+                    padding: 12px 20px;
+                    border-radius: 25px;
+                    font-size: 14px;
+                    cursor: pointer;
+                    backdrop-filter: blur(10px);
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                    transition: all 0.3s ease;
+                `;
+                
+                returnBtn.onmouseover = () => {
+                    returnBtn.style.background = 'rgba(184, 134, 11, 1)';
+                    returnBtn.style.transform = 'scale(1.05)';
+                };
+                
+                returnBtn.onmouseout = () => {
+                    returnBtn.style.background = 'rgba(184, 134, 11, 0.9)';
+                    returnBtn.style.transform = 'scale(1)';
+                };
+                
+                returnBtn.onclick = () => {
+                    window.location.href = 'https://www.sparkrobot.fi/';
+                };
+                
+                document.body.appendChild(returnBtn);
+            }
+        }
+
+        // Call addReturnButton when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', addReturnButton);
+        } else {
+            addReturnButton();
+        }
+
+        // Watch Robot button
+        const watchBtn = document.getElementById('watchRobotBtn');
+        if (watchBtn) {
+            watchBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                ping(pingUrl, 3000)
+                    .then(() => { 
+                        window.open(targetUrl, '_blank'); // Avaa uudessa välilehdessä
+                        addActivity('User', 'Watching robot - Server accessible');
+                    })
+                    .catch(() => { 
+                        // Do nothing if server is offline - no alert, no navigation
+                        addActivity('System', 'Watch attempt failed - Server offline');
+                    });
+            });
+        }
+
+        // Control Robot button
+        const controlBtn = document.getElementById('controlRobotBtn');
+        if (controlBtn) {
+            controlBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                ping(pingUrl, 3000)
+                    .then(() => { 
+                        window.open(targetUrl, '_blank'); // Avaa uudessa välilehdessä
+                        addActivity('User', 'Controlling robot - Server accessible');
+                    })
+                    .catch(() => { 
+                        // Do nothing if server is offline - no alert, no navigation
+                        addActivity('System', 'Control attempt failed - Server offline');
+                    });
+            });
+        }
     </script>
 </body>
 </html>
-
