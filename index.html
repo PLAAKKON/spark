@@ -1144,16 +1144,8 @@
         const watchBtn = document.getElementById('watchRobotBtn');
         if (watchBtn) {
             watchBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                ping(pingUrl, 3000)
-                    .then(() => { 
-                        window.open(targetUrl, '_blank'); // Avaa uudessa välilehdessä
-                        addActivity('User', 'Watching robot - Server accessible');
-                    })
-                    .catch(() => { 
-                        // Do nothing if server is offline - no alert, no navigation
-                        addActivity('System', 'Watch attempt failed - Server offline');
-                    });
+                // Linkki avautuu normaalisti, ei tarvitse estää
+                addActivity('User', 'Opening robot viewer');
             });
         }
 
@@ -1161,16 +1153,8 @@
         const controlBtn = document.getElementById('controlRobotBtn');
         if (controlBtn) {
             controlBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                ping(pingUrl, 3000)
-                    .then(() => { 
-                        window.open(targetUrl, '_blank'); // Avaa uudessa välilehdessä
-                        addActivity('User', 'Controlling robot - Server accessible');
-                    })
-                    .catch(() => { 
-                        // Do nothing if server is offline - no alert, no navigation
-                        addActivity('System', 'Control attempt failed - Server offline');
-                    });
+                // Linkki avautuu normaalisti, ei tarvitse estää
+                addActivity('User', 'Opening robot viewer');
             });
         }
     </script>
