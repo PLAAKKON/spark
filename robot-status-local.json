@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-09-05T09:17:38.982090",
+  "timestamp": "2025-09-05T09:31:08.513130",
   "status": "online",
-  "message": "Robot server running",
+  "message": "ROBOT LIVE - VIEWER READY",
   "services": {
     "http_server": true,
     "websocket_server": true,
@@ -10,9 +10,9 @@
   "viewers": 0,
   "recent_activity": [
     {
-      "time": "09:17:38",
-      "type": "HTTP",
-      "message": "Server online via start-demo.bat"
+      "time": "09:31:08",
+      "type": "DEMO",
+      "message": "ASIAKASESITTELY - ROBOT ONLINE"
     }
   ]
 }
