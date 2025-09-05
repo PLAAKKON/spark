@@ -1,0 +1,18 @@
+{
+  "timestamp": "2025-09-05T09:17:38.982090",
+  "status": "online",
+  "message": "Robot server running",
+  "services": {
+    "http_server": true,
+    "websocket_server": true,
+    "cloudflare_tunnel": true
+  },
+  "viewers": 0,
+  "recent_activity": [
+    {
+      "time": "09:17:38",
+      "type": "HTTP",
+      "message": "Server online via start-demo.bat"
+    }
+  ]
+}
