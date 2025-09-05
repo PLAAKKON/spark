@@ -651,10 +651,10 @@
             </div>
             
             <div class="cta-buttons">
-                <a href="https://sparkrobot.fi/robot-viewer.html" class="btn btn-primary" id="watchRobotBtn" target="_blank">
+                <a href="javascript:void(0)" class="btn btn-primary" id="watchRobotBtn" onclick="checkAndNavigate('watch')">
                     <i class="fas fa-video"></i> Watch Robot Live
                 </a>
-                <a href="https://sparkrobot.fi/robot-viewer.html" class="btn btn-primary" id="controlRobotBtn" target="_blank">
+                <a href="javascript:void(0)" class="btn btn-primary" id="controlRobotBtn" onclick="checkAndNavigate('control')">
                     <i class="fas fa-gamepad"></i> Control Robot
                 </a>
                 <a href="#problem" class="btn btn-secondary">
@@ -897,6 +897,49 @@
             ).join('');
         }
         
+        // Check if robot viewer page is accessible before navigating
+        async function checkAndNavigate(type) {
+            const targetUrl = 'https://sparkrobot.fi/robot-viewer.html';
+            
+            try {
+                // Try to create an image element to test if the domain is accessible
+                // This bypasses CORS issues since images don't have CORS restrictions
+                const testConnectivity = () => {
+                    return new Promise((resolve, reject) => {
+                        const img = new Image();
+                        const timeout = setTimeout(() => {
+                            reject(new Error('Timeout'));
+                        }, 5000);
+                        
+                        img.onload = () => {
+                            clearTimeout(timeout);
+                            resolve(true);
+                        };
+                        
+                        img.onerror = () => {
+                            clearTimeout(timeout);
+                            reject(new Error('Domain not accessible'));
+                        };
+                        
+                        // Try to load a small image from the domain
+                        img.src = 'https://sparkrobot.fi/favicon.ico?' + Date.now();
+                    });
+                };
+                
+                await testConnectivity();
+                
+                // If we get here, the domain is accessible
+                window.open(targetUrl, '_blank');
+                addActivity('User', `${type === 'watch' ? 'Watching' : 'Controlling'} robot - Page accessible`);
+                
+            } catch (error) {
+                // Domain is not accessible
+                const actionText = type === 'watch' ? 'watch' : 'control';
+                alert(`Robot system is currently offline. Cannot ${actionText} robot at this time.\n\nThe robot viewer page is not accessible. Please try again when the broadcast is live.`);
+                addActivity('System', `Failed to access robot viewer - System offline`);
+            }
+        }
+
         // Check robot system connection from live site
         async function checkRobotConnection() {
             const statusDot = document.getElementById('statusDot');
@@ -954,64 +997,21 @@
                 console.log(`[${new Date().toLocaleString()}] Could not fetch cached status from GitHub: ${error.message}`);
             }
             
-            // Fallback: Try direct connection to live server (may fail due to CORS)
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3000);
-                
-                const response = await fetch('https://sparkrobot.fi/status.json', {
-                    method: 'GET',
-                    signal: controller.signal,
-                    mode: 'cors'
-                });
-                
-                clearTimeout(timeoutId);
-                
-                if (response.ok) {
-                    const status = await response.json();
-                    
-                    if (status.status === 'online') {
-                        isRobotOnline = true;
-                        lastOnlineTime = new Date();
-                        statusDot.className = 'status-dot status-online';
-                        
-                        const wsStatus = status.services?.websocket_server ? '✅ WebSocket' : '❌ WebSocket';
-                        const httpStatus = status.services?.http_server ? '✅ HTTP' : '❌ HTTP';
-                        const viewers = status.viewers || 0;
-                        statusText.textContent = `🎥 LIVE | ${wsStatus} | ${httpStatus} | 👥 ${viewers}`;
-                        
-                        console.log(`[${new Date().toLocaleString()}] Robot system ONLINE - Direct connection successful`);
-                        return;
-                    }
-                }
-            } catch (error) {
-                console.log(`[${new Date().toLocaleString()}] Direct connection failed (expected due to CORS): ${error.message}`);
+            // Server is offline - update status accordingly
+            const currentTime = new Date().toLocaleString();
+            const lastOnlineText = lastOnlineTime ? lastOnlineTime.toLocaleString() : 'Never';
             
-                const currentTime = new Date().toLocaleString();
-                const lastOnlineText = lastOnlineTime ? lastOnlineTime.toLocaleString() : 'Never';
-                
-                console.log(`[${currentTime}] Robot system OFFLINE - ${error.message}`);
-                console.log(`[${currentTime}] Last online: ${lastOnlineText}`);
-                console.log(`[${currentTime}] Retrying connection in 30 seconds...`);
-                
-                isRobotOnline = false;
-                statusDot.className = 'status-dot status-offline';
-                statusText.textContent = lastOnlineTime ? 
-                    `📴 Broadcast OFFLINE (Last live: ${lastOnlineTime.toLocaleTimeString()})` : 
-                    '📴 Broadcast OFFLINE';
-                
-                // Add offline activity log
-                addActivity('System', 'Broadcast offline');
-                
-                // Update button behavior for offline robot
-                watchBtn.href = 'https://sparkrobot.fi/robot-viewer.html';
-                watchBtn.target = '_blank';
-                watchBtn.onclick = null;
-                
-                controlBtn.href = 'https://sparkrobot.fi/robot-viewer.html';
-                controlBtn.target = '_blank';
-                controlBtn.onclick = null;
-            }
+            console.log(`[${currentTime}] Robot system OFFLINE - No status available`);
+            console.log(`[${currentTime}] Last online: ${lastOnlineText}`);
+            
+            isRobotOnline = false;
+            statusDot.className = 'status-dot status-offline';
+            statusText.textContent = lastOnlineTime ? 
+                `📴 Broadcast OFFLINE (Last live: ${lastOnlineTime.toLocaleTimeString()})` : 
+                '📴 Broadcast OFFLINE';
+            
+            // Add offline activity log
+            addActivity('System', 'Broadcast offline');
         }
 
         // Scroll animations
@@ -1097,4 +1097,3 @@
     </script>
 </body>
 </html>
-
